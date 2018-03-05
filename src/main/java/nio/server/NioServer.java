@@ -8,6 +8,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 public class NioServer {
     private final int port;
@@ -17,7 +18,7 @@ public class NioServer {
         this.port = port;
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         int port = 7878;
         new NioServer(port).start();
     }
@@ -29,10 +30,11 @@ public class NioServer {
         sc.register(key.selector(), SelectionKey.OP_READ | SelectionKey.OP_WRITE);
     }
 
-    private void handleWrite(SelectionKey key) throws IOException {
+    private void handleWrite(SelectionKey key) throws Exception {
+        TimeUnit.SECONDS.sleep(3);
         ByteBuffer buffer = ByteBuffer.allocate(64);
         SocketChannel sc = (SocketChannel) key.channel();
-        buffer.put("hello".getBytes());
+        buffer.put("Server hello".getBytes());
         buffer.flip();
         while (buffer.hasRemaining()) {
             sc.write(buffer);
@@ -40,7 +42,7 @@ public class NioServer {
         buffer.compact();
     }
 
-    private void handleRead(SelectionKey key) throws IOException {
+    private void handleRead(SelectionKey key) throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(64);
         SocketChannel sc = (SocketChannel) key.channel();
         int size = sc.read(buffer);
@@ -58,7 +60,7 @@ public class NioServer {
         }
     }
 
-    private void start() {
+    private void start() throws Exception {
         ServerSocketChannel ssc = null;
         Selector selector = null;
         try {
@@ -88,7 +90,7 @@ public class NioServer {
                     iterator.remove();
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         } finally {
             try {
