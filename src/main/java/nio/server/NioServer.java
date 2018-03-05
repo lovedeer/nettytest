@@ -7,21 +7,19 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Iterator;
 
 public class NioServer {
     private final int port;
-    private final String host;
     private static final int TIMEOUT = 3000;
 
-    public NioServer(int port, String host) {
+    public NioServer(int port) {
         this.port = port;
-        this.host = host;
     }
 
     public static void main(String[] args) throws IOException {
         int port = 7878;
-        String host = "127.0.0.1";
-        new NioServer(port, host).start();
+        new NioServer(port).start();
     }
 
     private void handleAccept(SelectionKey key) throws IOException {
@@ -66,7 +64,7 @@ public class NioServer {
         try {
             ssc = ServerSocketChannel.open();
             selector = Selector.open();
-            ssc.bind(new InetSocketAddress(host, port));
+            ssc.bind(new InetSocketAddress(port));
             ssc.configureBlocking(false);
             ssc.register(selector, SelectionKey.OP_ACCEPT);
             while (true) {
@@ -74,7 +72,10 @@ public class NioServer {
                     System.out.println("......");
                     continue;
                 }
-                for (SelectionKey selectionKey : selector.selectedKeys()) {
+
+                Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
+                while (iterator.hasNext()) {
+                    SelectionKey selectionKey = iterator.next();
                     if (selectionKey.isAcceptable()) {
                         handleAccept(selectionKey);
                     } else if (selectionKey.isReadable()) {
@@ -84,6 +85,7 @@ public class NioServer {
                     } else if (selectionKey.isConnectable()) {
                         System.out.println("Server is connectable!");
                     }
+                    iterator.remove();
                 }
             }
         } catch (IOException e) {
