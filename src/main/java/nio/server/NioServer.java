@@ -34,7 +34,7 @@ public class NioServer {
         TimeUnit.SECONDS.sleep(3);
         ByteBuffer buffer = ByteBuffer.allocate(64);
         SocketChannel sc = (SocketChannel) key.channel();
-        buffer.put("Server hello".getBytes());
+        buffer.put("Server : 你好!".getBytes());
         buffer.flip();
         while (buffer.hasRemaining()) {
             sc.write(buffer);

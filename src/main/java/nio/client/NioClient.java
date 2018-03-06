@@ -78,8 +78,8 @@ public class NioClient {
         TimeUnit.SECONDS.sleep(3);
         ByteBuffer buffer = ByteBuffer.allocate(1024);
         SocketChannel sc = (SocketChannel) key.channel();
-        String info = "Client Hello";
-        buffer.put(info.getBytes());
+        String info = "Client : 你好!";
+        buffer.put(info.getBytes("GBK"));
         buffer.flip();
         while (buffer.hasRemaining()) {
             sc.write(buffer);
