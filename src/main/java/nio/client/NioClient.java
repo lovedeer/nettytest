@@ -1,17 +1,23 @@
 package nio.client;
 
+import io.netty.util.CharsetUtil;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 public class NioClient {
     private final int port;
     private final String host;
+    private CharsetDecoder decoder = Charset.forName("UTF-8").newDecoder();
 
     public NioClient(int port, String host) {
         this.port = port;
@@ -62,11 +68,9 @@ public class NioClient {
         int size = sc.read(buffer);
         while (size > 0) {
             buffer.flip();
-            while (buffer.hasRemaining()) {
-                System.out.print((char) buffer.get());
-            }
+            CharBuffer charBuffer = decoder.decode(buffer);
+            System.out.println(charBuffer.toString());
             buffer.clear();
-            System.out.println();
             size = sc.read(buffer);
         }
         if (size == -1) {
@@ -79,7 +83,7 @@ public class NioClient {
         ByteBuffer buffer = ByteBuffer.allocate(1024);
         SocketChannel sc = (SocketChannel) key.channel();
         String info = "Client : 你好!";
-        buffer.put(info.getBytes("GBK"));
+        buffer.put(info.getBytes(CharsetUtil.UTF_8));
         buffer.flip();
         while (buffer.hasRemaining()) {
             sc.write(buffer);
